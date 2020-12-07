@@ -6,7 +6,6 @@ const Homepage=()=>{
 
     return(
         <div className='homepage'>
-        <h1>This is HomePage!</h1>
         <Directory />
         </div>
     )
