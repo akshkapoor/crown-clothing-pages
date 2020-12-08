@@ -5,32 +5,44 @@ import { Route, Switch } from "react-router-dom";
 import Shoppage from "./pages/shoppage/shoppage";
 import Header from "./components/header/header";
 import SignInAndSignUp from "./pages/signin-and-signup/signin-and-signup";
-import { auth } from "./firebase/firebase.utils";
+import { auth, createUserProfileDocument } from "./firebase/firebase.utils";
 
 class App extends React.Component {
-  constructor(){
+  constructor() {
     super();
-    this.state={
-      currentUser:null
-    }
+    this.state = {
+      currentUser: null,
+    };
   }
-  unsubscribefromAuth=null;
+  unsubscribefromAuth = null;
 
-  componentDidMount(){
-    this.unsubscribefromAuth=auth.onAuthStateChanged(user=>{
-      this.setState({currentUser:user})
-      //console.log(user)
+  componentDidMount() {
+    this.unsubscribefromAuth = auth.onAuthStateChanged(async (userAuth) => {
+      if (userAuth) {
+        const userRef = await createUserProfileDocument(userAuth);
+
+        userRef.onSnapshot((snapShot) => {
+          this.setState({
+            currentUser: {
+              id: snapShot.id,
+              ...snapShot.data()
+            }
+          });
+        });
+      } else {
+        this.setState({ currentUser: null });
+      }
     });
   }
 
-  componentWillUnmount(){
+  componentWillUnmount() {
     this.unsubscribefromAuth();
   }
 
   render() {
     return (
       <div>
-        <Header currentUser={this.state.currentUser}/>
+        <Header currentUser={this.state.currentUser} />
         <Switch>
           <Route exact path="/" component={Homepage}></Route>
           <Route exact path="/shop/" component={Shoppage}></Route>
